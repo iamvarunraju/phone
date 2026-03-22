@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1C0A00">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>AYYO Rasayana | The Pan-Indian Culinary Atlas</title>
+<link href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Tiro+Devanagari+Sanskrit:ital@0;1&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="atlas.css">
+</head>
+<body>
+
+<div class="cursor" id="cur"></div>
+<div class="cursor-ring" id="curR"></div>
+<div class="toaster" id="toaster"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+  <div class="modal-sheet" id="modalSheet" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="atlas-nav">
+  <a href="index.html" class="nav-logo">
+    <div class="nav-diya"></div>
+    <div>
+      <div class="nav-wordmark">AYYO</div>
+      <div class="nav-sub">रसायन</div>
+    </div>
+  </a>
+
+  <div class="nav-center">
+    <div class="spice-meter" id="spiceMeter">
+      <span class="sm-label">Spice</span>
+      <div class="sm-pips">
+        <span class="sm-pip lit"></span>
+        <span class="sm-pip lit"></span>
+        <span class="sm-pip lit"></span>
+        <span class="sm-pip"></span>
+        <span class="sm-pip"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-right">
+    <button class="nav-pill" id="vegBtn" onclick="toggleVeg()" title="Veg only">
+      <i class="fa-solid fa-leaf"></i><span class="pill-label"> Veg</span>
+    </button>
+    <button class="nav-pill" onclick="surpriseMe()" title="Surprise me">
+      <i class="fa-solid fa-shuffle"></i><span class="pill-label"> Surprise</span>
+    </button>
+    <button class="nav-pill yatra-pill" id="yatraPill" onclick="toggleYatraWidget()">
+      <i class="fa-solid fa-route"></i>
+      <span id="yatraNum">0</span><span class="pill-text"> stops</span>
+    </button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="atlas-main">
+
+  <!-- DISCOVERY PANEL -->
+  <aside class="discovery-panel" id="discPanel">
+    <div class="search-header">
+      <h2 class="panel-title">Explore the <em>Lineage.</em></h2>
+
+      <div class="search-wrap">
+        <i class="fa-solid fa-magnifying-glass search-icon-i"></i>
+        <input type="text" id="searchBox" class="search-input" placeholder="Search 18 states, dishes…" autocomplete="off">
+        <button class="search-clear" id="searchClear" onclick="clearSearch()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="filter-row">
+        <button class="fchip active" onclick="setFilter('all',this)">All India</button>
+        <button class="fchip" onclick="setFilter('south',this)">
+          <i class="fa-solid fa-star" style="color:var(--sindoor);font-size:.6rem"></i> South
+        </button>
+        <button class="fchip" onclick="setFilter('north',this)">North</button>
+        <button class="fchip" onclick="setFilter('coastal',this)">Coastal</button>
+        <button class="fchip" onclick="setFilter('veg',this)">
+          <i class="fa-solid fa-leaf" style="color:#6DBF67"></i> Veg
+        </button>
+      </div>
+
+      <div class="state-carousel" id="stateCarousel"></div>
+    </div>
+
+    <div id="resultsContainer" class="results-container">
+      <div class="empty-state">
+        <div class="empty-mandala">
+          <div class="em-ring em-1"></div>
+          <div class="em-ring em-2"></div>
+          <div class="em-ring em-3"></div>
+          <div class="em-center">🪔</div>
+        </div>
+        <p class="empty-title">Namaskaram</p>
+        <p class="empty-sub">Search or tap a state to light the diya and begin your culinary pilgrimage</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAP PANEL -->
+  <section class="map-panel">
+    <div id="yatraMap"></div>
+
+    <div class="map-top">
+      <div class="map-label" id="mapLabel">
+        <i class="fa-solid fa-location-dot"></i>
+        <span id="mapStateTxt">Select a State</span>
+      </div>
+    </div>
+
+    <!-- YATRA WIDGET -->
+    <div class="yatra-widget" id="yatraWidget">
+      <div class="yw-head">
+        <div>
+          <div class="yw-title">My Yatra</div>
+          <div class="yw-count" id="ywCount">0 stops planned</div>
+        </div>
+        <button class="yw-del" onclick="clearYatra()" title="Clear"><i class="fa-solid fa-trash-can"></i></button>
+      </div>
+      <ul class="yatra-list" id="yatraList"></ul>
+      <button class="btn-route" onclick="drawRoute()">
+        <i class="fa-solid fa-map-marked-alt"></i> Map the Route
+      </button>
+    </div>
+
+    <!-- MOBILE TOGGLE -->
+    <button class="panel-toggle" id="panelToggleBtn" onclick="togglePanel()">
+      <i class="fa-solid fa-fire"></i>
+      <span>Explore Dishes</span>
+    </button>
+  </section>
+</main>
+
+<script src="atlas.js"></script>
+</body>
+</html>
